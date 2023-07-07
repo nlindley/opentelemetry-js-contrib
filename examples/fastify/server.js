@@ -6,12 +6,12 @@ import Tracing from './tracing.js';
 
 const tracing = Tracing('example-fastify-server');
 
-const { default: Fastify } = await import('fastify');
+const Fastify = await import('fastify');
 
 const { context, trace } = opentelemetry;
 
 const PORT = 8080;
-const app = Fastify({ logger: true });
+const app = Fastify.fastify({ logger: true });
 app.register(fastifyExpress).register(subsystem);
 
 async function subsystem(fastify) {
@@ -40,8 +40,12 @@ async function subsystem(fastify) {
     const span = trace.getSpan(context.active());
     span.setAttribute('order', 4);
 
-    const result = await axios.get('https://raw.githubusercontent.com/open-telemetry/opentelemetry-js/main/package.json');
-    const result2 = await axios.get('https://raw.githubusercontent.com/open-telemetry/opentelemetry-js/main/package.json');
+    const result = await axios.get(
+      'https://raw.githubusercontent.com/open-telemetry/opentelemetry-js/main/package.json'
+    );
+    const result2 = await axios.get(
+      'https://raw.githubusercontent.com/open-telemetry/opentelemetry-js/main/package.json'
+    );
 
     tracing.log('sending response');
     // throw Error('boom  lala');
@@ -67,7 +71,9 @@ async function subsystem(fastify) {
 }
 
 app.post('/run_test/:id', async (req, res) => {
-  const result = await axios.get('https://raw.githubusercontent.com/open-telemetry/opentelemetry-js/main/package.json');
+  const result = await axios.get(
+    'https://raw.githubusercontent.com/open-telemetry/opentelemetry-js/main/package.json'
+  );
   tracing.log('sending response');
   res.send(`OK ${result.data.version}`);
 });
