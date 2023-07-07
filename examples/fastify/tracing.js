@@ -1,19 +1,23 @@
-'use strict';
+import opentelemetry from '@opentelemetry/api';
 
-const opentelemetry = require('@opentelemetry/api');
+import { CollectorTraceExporter } from '@opentelemetry/exporter-collector';
+import Instrumentation from '@opentelemetry/instrumentation';
+import OtelResources from '@opentelemetry/resources';
+import SdkTraceBase from '@opentelemetry/sdk-trace-base';
+import SdkTraceNode from '@opentelemetry/sdk-trace-node';
+import SemanticConventions from '@opentelemetry/semantic-conventions';
 
+import { FastifyInstrumentation } from '@opentelemetry/instrumentation-fastify';
+import OtelHttpInstrumentation from '@opentelemetry/instrumentation-http';
+
+const { registerInstrumentations } = Instrumentation;
+const { Resource } = OtelResources;
+const { SimpleSpanProcessor } = SdkTraceBase;
+const { NodeTracerProvider } = SdkTraceNode;
+const { SemanticResourceAttributes } = SemanticConventions;
 const { diag, DiagConsoleLogger, DiagLogLevel } = opentelemetry;
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
-
-const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
-const { registerInstrumentations } = require('@opentelemetry/instrumentation');
-const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
-const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
-const { CollectorTraceExporter } = require('@opentelemetry/exporter-collector');
-
-const { FastifyInstrumentation } = require('@opentelemetry/instrumentation-fastify');
-const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+const { HttpInstrumentation } = OtelHttpInstrumentation;
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
 function log() {
   // eslint-disable-next-line prefer-rest-params
@@ -22,7 +26,7 @@ function log() {
   console.log.apply(this, args);
 }
 
-module.exports = (serviceName) => {
+export default serviceName => {
   const provider = new NodeTracerProvider({
     resource: new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: serviceName,

@@ -1,18 +1,18 @@
-'use strict';
-
 // eslint-disable-next-line
-const tracing = require('./tracing')('example-fastify-server');
-const opentelemetry = require('@opentelemetry/api');
+import opentelemetry from '@opentelemetry/api';
+import axios from 'axios';
+import fastifyExpress from 'fastify-express';
+import Tracing from './tracing.js';
+
+const tracing = Tracing('example-fastify-server');
+
+const { default: Fastify } = await import('fastify');
 
 const { context, trace } = opentelemetry;
-const Fastify = require('fastify');
-const axios = require('axios');
 
 const PORT = 8080;
 const app = Fastify({ logger: true });
-app
-  .register(require('fastify-express'))
-  .register(subsystem);
+app.register(fastifyExpress).register(subsystem);
 
 async function subsystem(fastify) {
   fastify.addHook('onRequest', async () => {
